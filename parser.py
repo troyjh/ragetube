@@ -11,7 +11,8 @@ TEST_URLS = ['http://www.abc.net.au/rage/archive/s3130203.htm',
              'http://www.abc.net.au/triplej/hottest100/10/countdown/cd_list.htm',
              'http://www.abc.net.au/triplej/hottest100_alltime/countdown/cd_list.htm',
              'http://www.abc.net.au/triplej/hottest100_08/history/2007.htm',
-             'http://www.abc.net.au/triplej/hottest100_08/history/2001.htm']
+             'http://www.abc.net.au/triplej/hottest100_08/history/2001.htm',
+             'http://www.abc.net.au/triplej/hottest100/11/fulllist.htm']
              
 def parse_url(url):
   try:
@@ -21,6 +22,8 @@ def parse_url(url):
       return parse_j2010(html)
     elif url == 'http://www.abc.net.au/triplej/hottest100_alltime/countdown/cd_list.htm':
       return parse_j2009(html)
+    elif url == 'http://www.abc.net.au/triplej/hottest100/11/fulllist.htm':
+      return parse_j2011(html)
     elif url.find('http://www.abc.net.au/triplej/hottest100_08/history/') > -1:
       year = int(url.split('/history/')[1].split('.htm')[0])
       if year > 2006:
@@ -108,6 +111,23 @@ def parse_j2010(html):
     song_info = {'title': string.strip(title), 'artist': string.strip(artist)}
     playlist_info.append(song_info)
   return playlist_title, playlist_info
+
+#Inserted by Troyjh for 2011
+def parse_j2011(html):
+  soup = BeautifulSoup(html)
+  playlist_title = 'Triple J Hottest 100: 2011'
+  rows = soup.find('div', {'id': 'content'}).findAll('li')
+  playlist_info = []
+  for row in rows:
+    split_info = row.string.split(' - ')
+    if len(split_info) < 2: # Just in case
+      continue
+    artist = split_info[0]
+    artist = re.sub('^\#''[0-9]*\:', '', artist) # Replace countdown #s
+    title = split_info[1]
+    song_info = {'title': string.strip(title), 'artist': string.strip(artist)}
+    playlist_info.append(song_info)
+  return playlist_title, playlist_info
     
     
 def parse_rage_old(html):
@@ -154,5 +174,3 @@ def parse_rage(html):
         songs_info.append(song_info)
   return playlist_title, songs_info
 
-
-             
